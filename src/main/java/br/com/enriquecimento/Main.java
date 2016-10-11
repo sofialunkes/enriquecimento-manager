@@ -26,7 +26,7 @@ public class Main {
 			StringBuilder sqlHistorico = new StringBuilder();
 			boolean alterou = false;
 
-			sqlInsert.append("INSERT INTO TBOD_HISTORICO_ASSOCIADO(" + "CD_ASSOCIADO, DT_ALTERACAO,");
+			sqlInsert.append("INSERT INTO TBOD_HISTORICO_ASSOCIADO(CD_ASSOCIADO, DT_ALTERACAO,");
 			sqlUpdate.append("UPDATE TBOD_ASSOCIADO SET ");
 
 			String[] dados = linha.split(";");
@@ -46,21 +46,95 @@ public class Main {
 			associado.setFlagNomeMaeCf(dados[12]);
 
 			cont++;
+			// verificar nome do associado
 			if (associado.getFlagNomeCf().equals("NOME ORIGINAL VALIDADO NA BASE CREDIFY")) {
 				sqlUpdate.append(" ID_NOME_SERASA = 'S'");
-				alterou=true;
+				alterou = true;
 			}
 			if (associado.getFlagNomeCf().equals("NOME CORRIGIDO PELA CREDIFY")
 					|| associado.getFlagNomeCf().equals("NOME ATRIBUIDO PELA CREDIFY")) {
 				sqlUpdate.append(" ID_NOME_SERASA = 'S', NM_ASSOCIADO = '" + associado.getNomeCf() + "'");
 				sqlInsert.append(" NM_ASSOCIADO");
+				System.out.println(sqlInsert.toString());
 				sqlHistorico.append("'" + associado.getNomeCf() + "'");
-				alterou=true;
+				alterou = true;
 			}
+			// verificar data de nascimento
 			if (associado.getFlagDtNascimentoCf().equals("DATA DE NASCIMENTO CORRIGIDO PELA CREDIFY")) {
+				if (alterou) {
+					sqlUpdate.append(", ");
+				}
+				sqlUpdate.append(" DT_NASCIMENTO = '" + associado.getDtNascimentoCf() + "' ");
+
+				if (!sqlInsert.toString().equals("INSERT INTO TBOD_HISTORICO_ASSOCIADO(CD_ASSOCIADO, DT_ALTERACAO,")) {
+					sqlInsert.append(", ");
+				}
+				sqlInsert.append("DT_NASCIMENTO");
+
+				if (!sqlHistorico.equals("")) {
+					sqlHistorico.append(", ");
+				}
+				sqlHistorico.append("'" + associado.getDtNascimentoCf() + "'");
+				alterou = true;
+			}
+
+			// verificar cpf
+			if (associado.getFlagCpfCf().equals("CPF ORIGINAL VALIDADO NA BASE CREDIFY")) {
+				if (alterou) {
+					sqlUpdate.append(", ");
+				}
+				sqlUpdate.append("ID_CPF_SERASA = 'S' ");
+				alterou = true;
+			}
+
+			if (associado.getFlagCpfCf().equals("CPF CORRIGIDO PELA CREDIFY")) {
+				if (alterou) {
+					sqlUpdate.append(", ");
+				}
+				sqlUpdate.append(" ID_CPF_SERASA = 'S', NR_CPF='" + associado.getCpfCf() + "'");
+				if (!sqlInsert.toString().equals("INSERT INTO TBOD_HISTORICO_ASSOCIADO(CD_ASSOCIADO, DT_ALTERACAO,")) {
+					sqlInsert.append(", ");
+				}
+				sqlInsert.append("NR_CPF");
+
+				if (!sqlHistorico.equals("")) {
+					sqlHistorico.append(", ");
+				}
+				sqlHistorico.append("'" + associado.getCpfCf() + "'");
+				alterou = true;
 
 			}
 
+			if (associado.getFlagCpfCf().equals("CPF ATRIBUIDO PELA CREDIFY")) {
+				if (alterou) {
+					sqlUpdate.append(", ");
+				}
+				if (!sqlInsert.toString().equals("INSERT INTO TBOD_HISTORICO_ASSOCIADO(CD_ASSOCIADO, DT_ALTERACAO,")) {
+					sqlInsert.append(", ");
+				}
+				sqlInsert.append("NR_CPF");
+				if (!sqlHistorico.equals("")) {
+					sqlHistorico.append(", ");
+				}
+				sqlHistorico.append("'" + associado.getCpfCf() + "'");
+				alterou = true;
+			}
+			
+			//verificar o nome da mae
+			if(associado.getFlagNomeMaeCf().equals("NOME MAE ORIGINAL VALIDADO NA BASE CREDIFY")){
+				if(alterou){
+					sqlUpdate.append(", ");
+				}
+				sqlUpdate.append(" ID_NOME_MAE_SERASA = 'S' ");
+				alterou = true;
+			}
+
+			if(associado.getFlagNomeMaeCf().equals("NOME MAE CORRIGIDO PELA CREDIFY")){
+				if(alterou) {
+					sqlUpdate.append(", ");
+				}
+				sqlUpdate.append("ID_NOME_MAE_SERASA = 'S', NM_MAE_ASSOCIADO = '"+associado.getNomeMaeCf()+"'");
+			}
 			linha = br.readLine();
 			if (cont == 3) {
 				break;
